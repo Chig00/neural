@@ -6,10 +6,15 @@
 #pragma GCC diagnostic pop
 
 int main() {
-	opennn::Tensor<int, 1> tensor(5);
-	for (int i = 0; i < 5; ++i) {
-		tensor(i) = i;
-	}
-	std::cout << tensor;
+	// opennn::Index inputs = 2;
+	// opennn::Index hidden = 4;
+	// opennn::Index outputs = 2;
+	// opennn::Tensor<Index, 1> architecture(3);
+	// architecture(0) = inputs;
+	// architecture(1) = first_hidden;
+	// architecture(2) = outputs;
+	// opennn::NeuralNetwork network(opennn::NeuralNetwork::ProjectType::Approximation, architecture);
+	// std::cout << network.get_layers_neurons_numbers();
+	opennn::NeuralNetwork network;
 	return 0;
 }
