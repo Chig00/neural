@@ -5,20 +5,20 @@
 int main() {
 	std::cout << "\nGenerating data...\n";
 	RNG rng;
-	Eigen::MatrixXd train_data(100, 2);
-	Eigen::MatrixXd train_labels(100, 1);
-	Eigen::MatrixXd test_data(10, 2);
-	Eigen::MatrixXd test_labels(10, 1);
+	Eigen::MatrixXd train_data(2, 100);
+	Eigen::MatrixXd train_labels(1, 100);
+	Eigen::MatrixXd test_data(2, 10);
+	Eigen::MatrixXd test_labels(1, 10);
 	
 	for (int i = 0; i < 100; ++i) {
-		train_data(i, 0) = rng.get_double(0, 1);
-		train_data(i, 1) = rng.get_double(0, 1);
-		train_labels(i, 0) = train_data(i, 0) > 0.5 && train_data(i, 1) > 0.5 ? 1 : -1;
+		train_data(0, i) = rng.get_double(0, 1);
+		train_data(1, i) = rng.get_double(0, 1);
+		train_labels(0, i) = train_data(0, i) > 0.5 && train_data(1, i) > 0.5;
 	}
 	for (int i = 0; i < 10; ++i) {
-		test_data(i, 0) = rng.get_double(0, 1);
-		test_data(i, 1) = rng.get_double(0, 1);
-		test_labels(i, 0) = test_data(i, 0) > 0.5 && test_data(i, 1) > 0.5 ? 1 : -1;
+		test_data(0, i) = rng.get_double(0, 1);
+		test_data(1, i) = rng.get_double(0, 1);
+		test_labels(0, i) = test_data(0, i) > 0.5 && test_data(1, i) > 0.5;
 	}
 	
 	std::cout << "\nConstructing architecture...\n";
