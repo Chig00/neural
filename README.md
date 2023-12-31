@@ -1,1 +1,1 @@
-`.\do buildrun small "100 20"`
+`.\do buildrun small "1000 200 25 0.003"`
