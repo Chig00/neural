@@ -1,2 +1,2 @@
 @echo off
-bin\%1
+bin\%1 %2 %3

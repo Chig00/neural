@@ -1,1 +1,1 @@
-call bin\build && bin\run
+call bin\build && bin\run %1 %2
