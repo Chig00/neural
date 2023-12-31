@@ -18,7 +18,7 @@ namespace Timer {
      * Returns the time in seconds elapsed since the epoch.
      */
     int current() noexcept {
-        return time(NULL);
+        return std::time(NULL);
     }
     
     /**
@@ -26,9 +26,7 @@ namespace Timer {
      * All times returned are relative to each other.
      */
     double time() noexcept {
-        return static_cast<std::chrono::duration<double>>(
-            std::chrono::steady_clock::now().time_since_epoch()
-        ).count();
+        return static_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now().time_since_epoch()).count();
     }
 
     /**
@@ -44,16 +42,8 @@ namespace Timer {
      * A constant expression function that converts time from
      *   hours, minutes, and seconds to just seconds.
      */
-    constexpr double to_seconds(
-        double hours = 0,
-        double minutes = 0,
-        double seconds = 0
-    ) noexcept {
-        return
-            HOURS_TO_MINUTES * MINUTES_TO_SECONDS * hours
-            + MINUTES_TO_SECONDS * minutes
-            + seconds
-        ;
+    constexpr double to_seconds(double hours = 0, double minutes = 0, double seconds = 0) noexcept {
+        return HOURS_TO_MINUTES * MINUTES_TO_SECONDS * hours + MINUTES_TO_SECONDS * minutes + seconds;
     }
 }
 
@@ -72,7 +62,6 @@ namespace Random {
         if (RANDOM_ASSERTION) {
             throw std::runtime_error(RANDOM_ERROR);
         }
-        
         return min + generator() % static_cast<unsigned>(1 + max - min);
     }
     
@@ -84,13 +73,7 @@ namespace Random {
         if (RANDOM_ASSERTION) {
             throw std::runtime_error(RANDOM_ERROR);
         }
-        
-        return
-            min
-            + (max - min)
-            * generator()
-            / (1 + static_cast<double>(std::numeric_limits<unsigned>::max()))
-        ;
+        return min + (max - min) * generator() / (1 + static_cast<double>(std::numeric_limits<unsigned>::max()));
     }
     
     /**
@@ -100,13 +83,7 @@ namespace Random {
         if (RANDOM_ASSERTION) {
             throw std::runtime_error(RANDOM_ERROR);
         }
-        
-        return
-            min
-            + (max - min)
-            * generator()
-            / static_cast<double>(std::numeric_limits<unsigned>::max())
-        ;
+        return min + (max - min) * generator() / static_cast<double>(std::numeric_limits<unsigned>::max());
     }
     
     #undef RANDOM_ASSERTION
@@ -120,16 +97,12 @@ class RNG {
         /**
          * Seeds the instance with the current time.
          */
-        RNG() noexcept:
-            generator(Timer::current())
-        {}
+        RNG() noexcept: generator(Timer::current()) {}
         
         /**
          * Seeds the instance with the given value.
          */
-        RNG(int seed) noexcept:
-            generator(seed)
-        {}
+        RNG(int seed) noexcept: generator(seed) {}
         
         /**
          * A method that returns a random integer in the interval [min, max].
