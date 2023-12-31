@@ -6,23 +6,30 @@
 #include "util.hpp"
 
 namespace NeuralRun {
-    namespace Small {
-        constexpr int INPUT_SIZE = 2;
+    namespace Quad {
+        constexpr int INPUT_SIZE = 11;
         constexpr int OUTPUT_SIZE = 2;
+        constexpr int A_LIMIT = 1;
+        constexpr int B_LIMIT = 0;
+        constexpr int C_LIMIT = 0;
         
         constexpr int DEFAULT_TRAIN_SIZE = 10000;
         constexpr int DEFAULT_TEST_SIZE = 2000;
         constexpr int DEFAULT_EPOCHS = 10;
         constexpr double DEFAULT_LEARNING_RATE = 0.001;
         constexpr int DEFAULT_BATCH_SIZE = 32;
-        constexpr int DEFAULT_HIDDEN_SIZE = 3;
+        constexpr int DEFAULT_HIDDEN_SIZE = 1;
         
         void make_data(Eigen::MatrixXd& data, Eigen::MatrixXd& labels, int size) {
             RNG rng;
             for (int i = 0; i < size; ++i) {
-                data(0, i) = rng.get_double(0, 1);
-                data(1, i) = rng.get_double(0, 1);
-                labels(1, i) = data(0, i) > 0.5 && data(1, i) > 0.5;
+                double a = rng.get_double(-A_LIMIT, A_LIMIT);
+                double b = rng.get_double(-B_LIMIT, B_LIMIT);
+                double c = rng.get_double(-C_LIMIT, C_LIMIT);
+                for (int x = 0; x < INPUT_SIZE; ++x) {
+                    data(x, i) = a * x * x + b * x + c;
+                }
+                labels(1, i) = a > 0;
                 labels(0, i) = 1 - labels(1, i);
             }
         }

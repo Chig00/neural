@@ -5,6 +5,7 @@
 #include <limits>
 #include <random>
 #include <ctime>
+#include <MiniDNN.h>
 
 /**
  * A namespace for time related functions.
@@ -130,3 +131,28 @@ class RNG {
     private:
         std::mt19937 generator;
 };
+
+namespace NeuralUtil {
+    void test(MiniDNN::Network& network,
+              const Eigen::MatrixXd& test_data,
+              const Eigen::MatrixXd& test_labels,
+              int test_size) {
+        std::cout << "\nTesting..." << std::endl;
+        Eigen::MatrixXd prediction(network.predict(test_data));
+        double correct = 0;
+        for (int i = 0; i < test_size; ++i) {
+            double predicted_0 = prediction(0, i);
+            double predicted_1 = prediction(1, i);
+            int predicted = predicted_1 > predicted_0;
+            int expected = test_labels(1, i);
+            if (predicted == expected) {
+                ++correct;
+            }
+            
+            std::cout << '(' << test_data(0, i) << ", " << test_data(1, i) << ") -> " << expected
+                      << " (Predicted " << predicted << ": [" << predicted_0 << ", " << predicted_1 << "])"
+                      << std::endl;
+        }
+        std::cout << "\nAccuracy: " << correct / test_size << std::endl;
+    }
+}
