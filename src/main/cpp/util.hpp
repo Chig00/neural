@@ -133,11 +133,15 @@ class RNG {
 };
 
 namespace NeuralUtil {
-    void test(MiniDNN::Network& network,
-              const Eigen::MatrixXd& test_data,
-              const Eigen::MatrixXd& test_labels,
-              int test_size) {
+    void test_binary_classifier(MiniDNN::Network& network,
+                                const Eigen::MatrixXd& test_data,
+                                const Eigen::MatrixXd& test_labels,
+                                int test_size,
+                                int input_size,
+                                double test_output_chance) {
         std::cout << "\nTesting..." << std::endl;
+        std::cout << "Outputting " << 100 * test_output_chance << "% of test cases." << std::endl;
+        RNG rng;
         Eigen::MatrixXd prediction(network.predict(test_data));
         double correct = 0;
         for (int i = 0; i < test_size; ++i) {
@@ -149,10 +153,16 @@ namespace NeuralUtil {
                 ++correct;
             }
             
-            std::cout << '(' << test_data(0, i) << ", " << test_data(1, i) << ") -> " << expected
-                      << " (Predicted " << predicted << ": [" << predicted_0 << ", " << predicted_1 << "])"
-                      << std::endl;
+            if (rng.get_real(0, 1) < test_output_chance) {
+                std::cout << "( ";
+                for (int j = 0; j < input_size; ++j) {
+                    std::cout << test_data(j, i) << ' ';
+                }
+                std::cout << ") -> " << expected
+                          << " (Predicted " << predicted << ": [" << predicted_0 << ", " << predicted_1 << "])"
+                          << std::endl;
+            }
         }
-        std::cout << "\nAccuracy: " << correct / test_size << std::endl;
+        std::cout << "Accuracy: " << correct / test_size << std::endl;
     }
 }

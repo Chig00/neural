@@ -16,9 +16,10 @@ namespace NeuralRun {
         constexpr int DEFAULT_TRAIN_SIZE = 10000;
         constexpr int DEFAULT_TEST_SIZE = 2000;
         constexpr int DEFAULT_EPOCHS = 10;
-        constexpr double DEFAULT_LEARNING_RATE = 0.001;
+        constexpr double DEFAULT_LEARNING_RATE = 0.002;
         constexpr int DEFAULT_BATCH_SIZE = 32;
         constexpr int DEFAULT_HIDDEN_SIZE = 1;
+        constexpr double DEFAULT_TEST_OUTPUT_CHANCE = 0.01;
         
         void make_data(Eigen::MatrixXd& data, Eigen::MatrixXd& labels, int size) {
             RNG rng;
@@ -42,6 +43,7 @@ namespace NeuralRun {
             double learning_rate = argument_count > 3 ? std::stod(arguments[3]) : DEFAULT_LEARNING_RATE;
             int batch_size = argument_count > 4 ? std::stoi(arguments[4]) : DEFAULT_BATCH_SIZE;
             int hidden_size = argument_count > 5 ? std::stoi(arguments[5]) : DEFAULT_HIDDEN_SIZE;
+            double test_output_chance = argument_count > 6 ? std::stod(arguments[6]) : DEFAULT_TEST_OUTPUT_CHANCE;
             std::cout << " Training set size: [" << train_size << "]\n"
                       << " Test set size: [" << test_size << "]\n"
                       << " Training epochs: [" << epochs << "]\n"
@@ -49,7 +51,8 @@ namespace NeuralRun {
                       << " Mini-batch size: [" << batch_size << "]\n"
                       << " Input size: [" << INPUT_SIZE << "]\n"
                       << " Hidden layer size: [" << hidden_size << "]\n"
-                      << " Output size: [" << OUTPUT_SIZE << ']' << std::endl;
+                      << " Output size: [" << OUTPUT_SIZE << "]\n"
+                      << " Test Output Chance: [" << test_output_chance << ']' << std::endl;
             
             std::cout << "\nGenerating data..." << std::endl;
             Eigen::MatrixXd train_data(INPUT_SIZE, train_size);
@@ -72,7 +75,7 @@ namespace NeuralRun {
             MiniDNN::Adam optimiser(learning_rate);
             network.fit(optimiser, train_data, train_labels, batch_size, epochs);
             
-            NeuralUtil::test(network, test_data, test_labels, test_size);
+            NeuralUtil::test_binary_classifier(network, test_data, test_labels, test_size, INPUT_SIZE, test_output_chance);
         }
     }
 }
