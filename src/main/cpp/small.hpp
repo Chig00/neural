@@ -18,6 +18,10 @@ namespace NeuralRun {
         constexpr int DEFAULT_HIDDEN_SIZE = 3;
         constexpr double DEFAULT_TEST_OUTPUT_CHANCE = 0.01;
         
+        /**
+         * Points in a 1x1 square.
+         * Positive set in top-right quadrant.
+         */
         void make_data(Eigen::MatrixXd& data, Eigen::MatrixXd& labels, int size) {
             RNG rng;
             for (int i = 0; i < size; ++i) {

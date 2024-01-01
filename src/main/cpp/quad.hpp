@@ -21,6 +21,10 @@ namespace NeuralRun {
         constexpr int DEFAULT_HIDDEN_SIZE = 1;
         constexpr double DEFAULT_TEST_OUTPUT_CHANCE = 0.01;
         
+        /**
+         * Quadratic functions.
+         * Positive set is convex.
+         */
         void make_data(Eigen::MatrixXd& data, Eigen::MatrixXd& labels, int size) {
             int offset = -INPUT_SIZE / 2;
             RNG rng;
@@ -69,7 +73,7 @@ namespace NeuralRun {
             network.add_layer(new MiniDNN::FullyConnected<MiniDNN::ReLU>(INPUT_SIZE, hidden_size));
             network.add_layer(new MiniDNN::FullyConnected<MiniDNN::Identity>(hidden_size, OUTPUT_SIZE));
             network.set_output(new MiniDNN::BinaryClassEntropy());
-            MiniDNN::VerboseCallback callback;
+            MiniDNN::VerboseCallback callback; // TODO: General-purpose random logging.
             network.set_callback(callback);
             network.init();
             
