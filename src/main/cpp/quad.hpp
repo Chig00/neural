@@ -10,8 +10,8 @@ namespace NeuralRun {
         constexpr int INPUT_SIZE = 11;
         constexpr int OUTPUT_SIZE = 2;
         constexpr int A_LIMIT = 1;
-        constexpr int B_LIMIT = 0;
-        constexpr int C_LIMIT = 0;
+        constexpr int B_LIMIT = 2;
+        constexpr int C_LIMIT = 5;
         
         constexpr int DEFAULT_TRAIN_SIZE = 10000;
         constexpr int DEFAULT_TEST_SIZE = 2000;
@@ -22,13 +22,15 @@ namespace NeuralRun {
         constexpr double DEFAULT_TEST_OUTPUT_CHANCE = 0.01;
         
         void make_data(Eigen::MatrixXd& data, Eigen::MatrixXd& labels, int size) {
+            int offset = -INPUT_SIZE / 2;
             RNG rng;
             for (int i = 0; i < size; ++i) {
                 double a = rng.get_double(-A_LIMIT, A_LIMIT);
                 double b = rng.get_double(-B_LIMIT, B_LIMIT);
                 double c = rng.get_double(-C_LIMIT, C_LIMIT);
-                for (int x = 0; x < INPUT_SIZE; ++x) {
-                    data(x, i) = a * x * x + b * x + c;
+                for (int j = 0; j < INPUT_SIZE; ++j) {
+                    int x = j + offset;
+                    data(j, i) = a * x * x + b * x + c;
                 }
                 labels(1, i) = a > 0;
                 labels(0, i) = 1 - labels(1, i);
