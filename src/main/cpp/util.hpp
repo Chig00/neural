@@ -185,22 +185,35 @@ namespace NeuralUtil {
             double probability;
     };
     
-    void test_binary_classifier(MiniDNN::Network& network,
-                                const Eigen::MatrixXd& test_data,
-                                const Eigen::MatrixXd& test_labels,
-                                int test_size,
-                                int input_size,
-                                double log_probability) noexcept {
+    int get_max_column_index(const Eigen::MatrixXd& matrix, int row_index, int columns) noexcept {
+        int max_index = 0;
+        double max = matrix(0, row_index);
+        for (int i = 1; i < columns; ++i) {
+            double value = matrix(i, row_index);
+            if (max < value) {
+                max = value;
+                max_index = i;
+            }
+        }
+        return max_index;
+    }
+    
+    void test_classifier(MiniDNN::Network& network,
+                         const Eigen::MatrixXd& test_data,
+                         const Eigen::MatrixXd& test_labels,
+                         int test_size,
+                         int input_size,
+                         int output_size,
+                         double log_probability) noexcept {
         std::cout << "\nTesting..." << std::endl;
         std::cout << "Outputting " << 100 * log_probability << "% of test cases." << std::endl;
         RNG rng;
         Eigen::MatrixXd prediction(network.predict(test_data));
         double correct = 0;
+        
         for (int i = 0; i < test_size; ++i) {
-            double predicted_0 = prediction(0, i);
-            double predicted_1 = prediction(1, i);
-            int predicted = predicted_1 > predicted_0;
-            int expected = test_labels(1, i);
+            int predicted = get_max_column_index(prediction, i, output_size);
+            int expected = get_max_column_index(test_labels, i, output_size);
             if (predicted == expected) {
                 ++correct;
             }
@@ -210,11 +223,14 @@ namespace NeuralUtil {
                 for (int j = 0; j < input_size; ++j) {
                     std::cout << test_data(j, i) << ' ';
                 }
-                std::cout << ") -> " << expected
-                          << " (Predicted " << predicted << ": [" << predicted_0 << ", " << predicted_1 << "])"
-                          << std::endl;
+                std::cout << ") -> " << expected << " (Predicted " << predicted << ": [ ";
+                for (int j = 0; j < output_size; ++j) {
+                    std::cout << prediction(j, i) << ' ';
+                }
+                std::cout << "])" << std::endl;
             }
         }
+        
         std::cout << "Accuracy: " << correct / test_size << std::endl;
     }
 }

@@ -29,8 +29,8 @@ namespace NeuralRun {
          * Positive set is convex.
          */
         void make_data(Eigen::MatrixXd& data, Eigen::MatrixXd& labels, int size) noexcept {
-            int offset = -INPUT_SIZE / 2;
             RNG rng;
+            int offset = -INPUT_SIZE / 2;
             for (int i = 0; i < size; ++i) {
                 double a = rng.get_double(-A_LIMIT, A_LIMIT);
                 double b = rng.get_double(-B_LIMIT, B_LIMIT);
@@ -93,7 +93,13 @@ namespace NeuralRun {
             MiniDNN::Adam optimiser(learning_rate);
             network.fit(optimiser, train_data, train_labels, batch_size, epochs);
             
-            NeuralUtil::test_binary_classifier(network, test_data, test_labels, test_size, INPUT_SIZE, log_probability);
+            NeuralUtil::test_classifier(network,
+                                        test_data,
+                                        test_labels,
+                                        test_size,
+                                        INPUT_SIZE,
+                                        OUTPUT_SIZE,
+                                        log_probability);
         }
     }
 }

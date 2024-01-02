@@ -1,6 +1,7 @@
 #include <sstream>
 #include "small.hpp"
 #include "quad.hpp"
+#include "ranges.hpp"
 
 constexpr int RUN_MODE_INDEX = 1;
 constexpr int RUN_ARGUMENTS_INDEX = 2;
@@ -31,6 +32,8 @@ int main(int argc, char** argv) {
         NeuralRun::Small::run(run_arguments);
     } else if (run_mode == "quad") {
         NeuralRun::Quad::run(run_arguments);
+    } else if (run_mode == "ranges") {
+        NeuralRun::Ranges::run(run_arguments);
     } else {
         std::ostringstream stream;
         stream << "Unknown run mode: [" << run_mode << "].";
