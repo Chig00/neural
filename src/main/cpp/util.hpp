@@ -133,14 +133,66 @@ class RNG {
 };
 
 namespace NeuralUtil {
+    class ProbabilisticCallback : public MiniDNN::Callback {
+        public:
+            ProbabilisticCallback(MiniDNN::Callback& callback, double probability) noexcept:
+                callback(callback),
+                probability(probability)
+            {}
+            
+            void pre_training_batch(const MiniDNN::Network* net, const Eigen::MatrixXd& x, const Eigen::MatrixXd& y) {
+                if (this->should_act()) {
+                    this->set_callback_members();
+                    this->callback.pre_training_batch(net, x, y);
+                }
+            }
+            
+            void pre_training_batch(const MiniDNN::Network* net, const Eigen::MatrixXd& x, const Eigen::RowVectorXi& y) {
+                if (this->should_act()) {
+                    this->set_callback_members();
+                    this->callback.pre_training_batch(net, x, y);
+                }
+            }
+            
+            void post_training_batch(const MiniDNN::Network* net, const Eigen::MatrixXd& x, const Eigen::MatrixXd& y) {
+                if (this->should_act()) {
+                    this->set_callback_members();
+                    this->callback.post_training_batch(net, x, y);
+                }
+            }
+            
+            void post_training_batch(const MiniDNN::Network* net, const Eigen::MatrixXd& x, const Eigen::RowVectorXi& y) {
+                if (this->should_act()) {
+                    this->set_callback_members();
+                    this->callback.post_training_batch(net, x, y);
+                }
+            }
+        
+        private:
+            bool should_act() noexcept {
+                return this->rng.get_real(0, 1) < this->probability;
+            }
+            
+            void set_callback_members() noexcept {
+                this->callback.m_nbatch = this->m_nbatch;
+                this->callback.m_batch_id = this->m_batch_id;
+                this->callback.m_nepoch = this->m_nepoch;
+                this->callback.m_epoch_id = this->m_epoch_id;
+            }
+            
+            RNG rng;
+            MiniDNN::Callback& callback;
+            double probability;
+    };
+    
     void test_binary_classifier(MiniDNN::Network& network,
                                 const Eigen::MatrixXd& test_data,
                                 const Eigen::MatrixXd& test_labels,
                                 int test_size,
                                 int input_size,
-                                double test_output_chance) {
+                                double log_probability) noexcept {
         std::cout << "\nTesting..." << std::endl;
-        std::cout << "Outputting " << 100 * test_output_chance << "% of test cases." << std::endl;
+        std::cout << "Outputting " << 100 * log_probability << "% of test cases." << std::endl;
         RNG rng;
         Eigen::MatrixXd prediction(network.predict(test_data));
         double correct = 0;
@@ -153,7 +205,7 @@ namespace NeuralUtil {
                 ++correct;
             }
             
-            if (rng.get_real(0, 1) < test_output_chance) {
+            if (rng.get_real(0, 1) < log_probability) {
                 std::cout << "( ";
                 for (int j = 0; j < input_size; ++j) {
                     std::cout << test_data(j, i) << ' ';

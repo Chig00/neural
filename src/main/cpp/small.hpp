@@ -10,19 +10,21 @@ namespace NeuralRun {
         constexpr int INPUT_SIZE = 2;
         constexpr int OUTPUT_SIZE = 2;
         
+        constexpr int MAX_ARGUMENT_COUNT = 7;
+        
         constexpr int DEFAULT_TRAIN_SIZE = 10000;
         constexpr int DEFAULT_TEST_SIZE = 2000;
         constexpr int DEFAULT_EPOCHS = 10;
         constexpr double DEFAULT_LEARNING_RATE = 0.001;
         constexpr int DEFAULT_BATCH_SIZE = 32;
         constexpr int DEFAULT_HIDDEN_SIZE = 3;
-        constexpr double DEFAULT_TEST_OUTPUT_CHANCE = 0.01;
+        constexpr double DEFAULT_LOG_PROBABILITY = 0.01;
         
         /**
          * Points in a 1x1 square.
          * Positive set in top-right quadrant.
          */
-        void make_data(Eigen::MatrixXd& data, Eigen::MatrixXd& labels, int size) {
+        void make_data(Eigen::MatrixXd& data, Eigen::MatrixXd& labels, int size) noexcept {
             RNG rng;
             for (int i = 0; i < size; ++i) {
                 data(0, i) = rng.get_double(0, 1);
@@ -34,13 +36,20 @@ namespace NeuralRun {
         
         void run(std::vector<std::string> arguments) {
             int argument_count = arguments.size();
+            if (argument_count > MAX_ARGUMENT_COUNT) {
+                std::ostringstream stream;
+                stream << "Invalid number of run arguments. Expected at most: [" << MAX_ARGUMENT_COUNT
+                       << "]. Received: [" << argument_count << "].";
+                throw std::runtime_error(stream.str());
+            }
+            
             int train_size = argument_count > 0 ? std::stoi(arguments[0]) : DEFAULT_TRAIN_SIZE;
             int test_size = argument_count > 1 ? std::stoi(arguments[1]) : DEFAULT_TEST_SIZE;
             int epochs = argument_count > 2 ? std::stoi(arguments[2]) : DEFAULT_EPOCHS;
             double learning_rate = argument_count > 3 ? std::stod(arguments[3]) : DEFAULT_LEARNING_RATE;
             int batch_size = argument_count > 4 ? std::stoi(arguments[4]) : DEFAULT_BATCH_SIZE;
             int hidden_size = argument_count > 5 ? std::stoi(arguments[5]) : DEFAULT_HIDDEN_SIZE;
-            double test_output_chance = argument_count > 6 ? std::stod(arguments[6]) : DEFAULT_TEST_OUTPUT_CHANCE;
+            double log_probability = argument_count > 6 ? std::stod(arguments[6]) : DEFAULT_LOG_PROBABILITY;
             std::cout << " Training set size: [" << train_size << "]\n"
                       << " Test set size: [" << test_size << "]\n"
                       << " Training epochs: [" << epochs << "]\n"
@@ -49,7 +58,7 @@ namespace NeuralRun {
                       << " Input size: [" << INPUT_SIZE << "]\n"
                       << " Hidden layer size: [" << hidden_size << "]\n"
                       << " Output size: [" << OUTPUT_SIZE << "]\n"
-                      << " Test Output Chance: [" << test_output_chance << ']' << std::endl;
+                      << " Log probability: [" << log_probability << ']' << std::endl;
             
             std::cout << "\nGenerating data..." << std::endl;
             Eigen::MatrixXd train_data(INPUT_SIZE, train_size);
@@ -64,15 +73,17 @@ namespace NeuralRun {
             network.add_layer(new MiniDNN::FullyConnected<MiniDNN::ReLU>(INPUT_SIZE, hidden_size));
             network.add_layer(new MiniDNN::FullyConnected<MiniDNN::Identity>(hidden_size, OUTPUT_SIZE));
             network.set_output(new MiniDNN::BinaryClassEntropy());
-            MiniDNN::VerboseCallback callback;
-            network.set_callback(callback);
+            MiniDNN::VerboseCallback verbose_callback;
+            NeuralUtil::ProbabilisticCallback probabilistic_callback(verbose_callback, log_probability);
+            network.set_callback(probabilistic_callback);
             network.init();
             
             std::cout << "\nTraining..." << std::endl;
+            std::cout << "Outputting " << 100 * log_probability << "% of training statistics." << std::endl;
             MiniDNN::Adam optimiser(learning_rate);
             network.fit(optimiser, train_data, train_labels, batch_size, epochs);
             
-            NeuralUtil::test_binary_classifier(network, test_data, test_labels, test_size, INPUT_SIZE, test_output_chance);
+            NeuralUtil::test_binary_classifier(network, test_data, test_labels, test_size, INPUT_SIZE, log_probability);
         }
     }
 }
